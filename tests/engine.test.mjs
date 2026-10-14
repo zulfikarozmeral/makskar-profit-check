@@ -1,0 +1,18 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {example,compare} from '../dist/engine.mjs';
+const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
+test('Independent gross-to-net reference values for all four scenarios',()=>{const a=compare(example);[129,102.6,256.6,104].forEach((n,i)=>close(a[i].profit,n));close(a[2].unit,128.3);close(a[0].margin,129/325*100)});
+test('Quoted expense VAT exclusive equivalent',()=>{const a=compare({...example,included:false,cost:100,shipping:50,other:10,bundleShipping:60});a.forEach((s,i)=>close(s.profit,[129,102.6,256.6,104][i]))});
+test('Commission inclusive VAT: 12% gross fee equals 10% net fee at 20% VAT',()=>{compare({...example,rate:12,commissionIncluded:true}).forEach((s,i)=>close(s.profit,compare(example)[i].profit))});
+test('Commission excluding sales VAT and including customer shipping',()=>{const s=compare({...example,baseGross:false,commissionShipping:true})[0];close(s.commission,32.5);close(s.profit,132.5)});
+test('Break-even solves the profit equation',()=>{const s=compare(example)[0];close(s.breakEven,2025/11);close(compare({...example,price:s.breakEven})[0].profit,0)});
+test('100% gross commission makes break-even unattainable',()=>assert.equal(compare({...example,rate:100})[0].breakEven,null));
+test('Zero costs and no commission',()=>close(compare({...example,cost:0,shipping:0,other:0,rate:0,shippingIncome:0})[0].profit,300));
+test('Full discount cannot manufacture a profit',()=>assert.ok(compare({...example,discount:100})[1].profit<0));
+test('Zero VAT',()=>close(compare({...example,vat:0,costVat:0,shippingVat:0,otherVat:0})[0].profit,162));
+test('Reject negative, nonfinite and out-of-range inputs',()=>{for(const v of [{cost:-1},{price:0},{rate:101},{shipping:NaN},{price:Infinity}])assert.throws(()=>compare({...example,...v}))});
+test('Bundle shipping is charged once per order; fixed overhead is not doubled',()=>{const s=compare(example)[2];close(s.shipping,60);close(s.goods,200);close(s.other,10)});
+test('Increasing a gross cost by 12 at 20% VAT reduces profit by 10',()=>{const a=compare(example),b=compare({...example,other:example.other+12});b.forEach((s,i)=>close(a[i].profit-s.profit,10))});
+test('Customer shipping commission switch reduces normal profit by 3 but not free shipping',()=>{const a=compare(example),b=compare({...example,commissionShipping:true});close(a[0].profit-b[0].profit,3);close(a[3].profit,b[3].profit)});
+test('Break-even remains correct for every commission basis and VAT inclusion combination',()=>{for(const baseGross of [true,false])for(const commissionIncluded of [true,false])for(const commissionShipping of [true,false]){const x={...example,baseGross,commissionIncluded,commissionShipping};const s=compare(x)[0];close(compare({...x,price:s.breakEven})[0].profit,0)}});
