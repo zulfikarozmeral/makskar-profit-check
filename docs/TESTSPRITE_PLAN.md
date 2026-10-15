@@ -46,3 +46,14 @@ https://www.testsprite.com/solutions/ci
 https://github.com/TestSprite/testsprite-action
 
 The hackathon specifically calls for the GitHub App integration; do not silently substitute an Actions-only setup.
+
+## Version 0.2 additional acceptance cases
+- Cost VAT-exclusive while shipping VAT-inclusive: with example and cost=120 net, platform=24 gross, packaging=5 net, standard profit is 84.00.
+- Add platform=24 and packaging=12 gross: bundle order profit 226.60; expenses are not doubled.
+- Enable tier shipping at product price 330: standard shipping 60 net, 10%-discount shipping 50 net.
+- At 299.99 shipping is 50 net; at 300 it is 60 net.
+- Bundle uses override shipping 60 net; disable override and default bundle uses 75 net.
+- Tier boundaries must start at zero and strictly increase; reject duplicates/negative costs.
+- Change TRY/EUR/USD: numeric amounts unchanged, currency labels update.
+- Higher shipping tiers causing renewed loss must display a warning.
+- Check first non-loss threshold terminology, separate expense VAT labels, and tier editor accessibility on mobile.

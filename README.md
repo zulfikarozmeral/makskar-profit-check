@@ -21,3 +21,12 @@ This is a first working prototype, not a completed submission. Public GitHub rep
 
 ## Privacy
 Inputs stay in memory in the browser. No storage, analytics, API connections, customer records, authentication or payments in the application. Hosting access control is separate.
+
+## Version 0.2
+Each expense has an independent VAT-included switch and VAT rate. Platform and packaging costs are separate per-order costs. Customer shipping remains gross at product VAT. Currency TRY/EUR/USD changes formatting only.
+
+Shipping supports manually entered tiers based on discounted gross product total (excluding customer shipping), using [lower, next lower) intervals. First tier starts at zero; last tier is unbounded. The bundle can override tiers with its own fee/VAT or follow common tiers. In fixed mode the separate bundle shipping amount always applies. These are user-entered illustrative tariffs, not marketplace feeds.
+
+Break-even output is the first non-loss product total across all piecewise shipping intervals; it can occur at a downward fee discontinuity rather than an exact zero-profit root. A warning appears when a subsequent tier causes losses again. This threshold holds order quantity and other inputs fixed.
+
+24 local calculation tests pass. GitHub repository: https://github.com/zulfikarozmeral/makskar-profit-check ; integration PR: https://github.com/zulfikarozmeral/makskar-profit-check/pull/1 . TestSprite suite and browser QA remain pending.
